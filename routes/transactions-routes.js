@@ -9,4 +9,6 @@ router.get("/:tid", transactionsControllers.getTransactionById);
 
 router.get("/user/:uid", transactionsControllers.getTransactionByUserId);
 
+router.post("/", transactionsControllers.createTransaction);
+
 module.exports = router;

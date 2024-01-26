@@ -1,10 +1,12 @@
+const { v4: uuid } = require("uuid");
+
 const DUMMY_TRANSACTION = [
   {
     tid: "t1",
     uid: "u1",
     date: 1705029633942,
     category: "교통/차량",
-    description: "버스비",
+    title: "버스비",
     amount: -4000,
     transaction_type: "지출",
     memo: "버스비",
@@ -14,7 +16,7 @@ const DUMMY_TRANSACTION = [
     uid: "u2",
     date: 1705129633942,
     category: "용돈",
-    description: "용돈",
+    title: "용돈",
     amount: 12000,
     transaction_type: "수입",
     memo: "",
@@ -24,7 +26,7 @@ const DUMMY_TRANSACTION = [
     uid: "u1",
     date: 1705229633942,
     category: "문화비",
-    description: "서적구매",
+    title: "서적구매",
     amount: -25000,
     transaction_type: "지출",
     memo: "컴퓨터공학입문서 구입",
@@ -34,7 +36,7 @@ const DUMMY_TRANSACTION = [
     uid: "u2",
     date: 1709329633942,
     category: "식비",
-    description: "외식비",
+    title: "외식비",
     amount: -52000,
     transaction_type: "지출",
     memo: "외식",
@@ -61,7 +63,6 @@ const getTransactionById = (req, res, next) => {
 const getTransactionByUserId = (req, res, next) => {
   const userId = req.params.uid;
 
-  console.log("0000");
   const user = DUMMY_TRANSACTION.filter((u) => {
     return u.uid === userId;
   });
@@ -77,5 +78,23 @@ const getTransactionByUserId = (req, res, next) => {
   res.json({ user: user });
 };
 
+const createTransaction = (req, res, next) => {
+  const { uid, category, title, amount, transaction_type, memo } = req.body;
+  const createdTransaction = {
+    tid: uuid(),
+    uid,
+    category,
+    title,
+    amount,
+    transaction_type,
+    memo,
+  };
+
+  DUMMY_TRANSACTION.push(createdTransaction);
+
+  res.status(201).json({ transaction: createdTransaction });
+};
+
 exports.getTransactionById = getTransactionById;
 exports.getTransactionByUserId = getTransactionByUserId;
+exports.createTransaction = createTransaction;
