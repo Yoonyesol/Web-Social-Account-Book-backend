@@ -1,4 +1,5 @@
 const { v4: uuid } = require("uuid");
+const HttpError = require("../models/http-error");
 
 const DUMMY_TRANSACTION = [
   {
@@ -52,9 +53,7 @@ const getTransactionById = (req, res, next) => {
 
   // 에러 핸들링
   if (!transaction) {
-    const error = new Error("해당 ID에 대한 입출금내역을 찾지 못했습니다.");
-    error.code = 404; //오류 상태
-    throw error;
+    throw new HttpError("해당 ID에 대한 입출금내역을 찾지 못했습니다.", 404);
   }
 
   res.json({ transaction: transaction });
@@ -68,11 +67,7 @@ const getTransactionByUserId = (req, res, next) => {
   });
 
   if (!user) {
-    const error = new Error(
-      "해당 유저 ID에 대한 입출금내역을 찾지 못했습니다."
-    );
-    error.code = 404;
-    throw error;
+    throw new HttpError("해당 유저의 입출금내역을 찾지 못했습니다.", 404);
   }
 
   res.json({ user: user });

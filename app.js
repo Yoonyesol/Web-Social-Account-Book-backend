@@ -3,15 +3,19 @@ const express = require("express");
 const app = express();
 
 const transactionsRouter = require("./routes/transactions-routes");
+const HttpError = require("./models/http-error");
 
 const bodyParser = require("body-parser");
-// 본문을 먼저 파싱 -> 본문의 json 데이터를 추출해서 객체나 배열 같이 일반적인 js 구조로 변환
+
 app.use(bodyParser.json());
 
-// 경로가 "/api/transactions"로 시작된다면 transactionsRouter 실행
 app.use("/api/transactions", transactionsRouter);
 
-//오류 처리 미들웨어 함수
+// 앞선 라우트에게서 응답을 받지 못했을 경우에만 실행
+app.use((req, res, next) => {
+  throw new HttpError("라우트를 찾지 못했습니다.", 404);
+});
+
 app.use((error, req, res, next) => {
   if (res.headerSent) {
     return next(error);
