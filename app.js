@@ -2,7 +2,7 @@ const express = require("express");
 
 const app = express();
 
-const transactionsRouter = require("./routes/transaction-routes");
+const transactionsRouter = require("./routes/transactions-routes");
 
 // 경로가 "/api/transactions"로 시작된다면 transactionsRouter 실행
 app.use("/api/transactions", transactionsRouter);

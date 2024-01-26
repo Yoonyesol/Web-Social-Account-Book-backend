@@ -1,10 +1,7 @@
-const express = require("express");
-
-const router = express.Router(); //특수 객체 생성
-
 const DUMMY_TRANSACTION = [
   {
-    tid: "1",
+    tid: "t1",
+    uid: "u1",
     date: 1705029633942,
     category: "교통/차량",
     description: "버스비",
@@ -13,7 +10,8 @@ const DUMMY_TRANSACTION = [
     memo: "버스비",
   },
   {
-    tid: "2",
+    tid: "t2",
+    uid: "u2",
     date: 1705129633942,
     category: "용돈",
     description: "용돈",
@@ -22,7 +20,8 @@ const DUMMY_TRANSACTION = [
     memo: "",
   },
   {
-    tid: "3",
+    tid: "t3",
+    uid: "u1",
     date: 1705229633942,
     category: "문화비",
     description: "서적구매",
@@ -31,7 +30,8 @@ const DUMMY_TRANSACTION = [
     memo: "컴퓨터공학입문서 구입",
   },
   {
-    tid: "4",
+    tid: "t4",
+    uid: "u2",
     date: 1709329633942,
     category: "식비",
     description: "외식비",
@@ -41,8 +41,7 @@ const DUMMY_TRANSACTION = [
   },
 ];
 
-//라우트에 요청이 도달하면 실행되는 함수
-router.get("/:tid", (req, res, next) => {
+const getTransactionById = (req, res, next) => {
   const transactionId = req.params.tid; // type: string
 
   const transaction = DUMMY_TRANSACTION.find((t) => {
@@ -57,6 +56,26 @@ router.get("/:tid", (req, res, next) => {
   }
 
   res.json({ transaction: transaction });
-});
+};
 
-module.exports = router;
+const getTransactionByUserId = (req, res, next) => {
+  const userId = req.params.uid;
+
+  console.log("0000");
+  const user = DUMMY_TRANSACTION.filter((u) => {
+    return u.uid === userId;
+  });
+
+  if (!user) {
+    const error = new Error(
+      "해당 유저 ID에 대한 입출금내역을 찾지 못했습니다."
+    );
+    error.code = 404;
+    throw error;
+  }
+
+  res.json({ user: user });
+};
+
+exports.getTransactionById = getTransactionById;
+exports.getTransactionByUserId = getTransactionByUserId;
