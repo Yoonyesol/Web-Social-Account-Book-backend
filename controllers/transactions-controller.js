@@ -1,7 +1,7 @@
 const { v4: uuid } = require("uuid");
 const HttpError = require("../models/http-error");
 
-const DUMMY_TRANSACTION = [
+let DUMMY_TRANSACTION = [
   {
     tid: "t1",
     uid: "u1",
@@ -59,18 +59,18 @@ const getTransactionById = (req, res, next) => {
   res.json({ transaction: transaction });
 };
 
-const getTransactionByUserId = (req, res, next) => {
+const getTransactionsByUserId = (req, res, next) => {
   const userId = req.params.uid;
 
-  const user = DUMMY_TRANSACTION.filter((u) => {
+  const transactions = DUMMY_TRANSACTION.filter((u) => {
     return u.uid === userId;
   });
 
-  if (!user) {
+  if (!transactions || transactions.length === 0) {
     throw new HttpError("해당 유저의 입출금내역을 찾지 못했습니다.", 404);
   }
 
-  res.json({ user: user });
+  res.json({ transactions });
 };
 
 const createTransaction = (req, res, next) => {
@@ -90,6 +90,36 @@ const createTransaction = (req, res, next) => {
   res.status(201).json({ transaction: createdTransaction });
 };
 
+const updateTransaction = (req, res, next) => {
+  const { category, title, amount, transaction_type, memo } = req.body;
+  const transactionId = req.params.tid;
+
+  const updatedTransaction = {
+    ...DUMMY_TRANSACTION.find((t) => t.tid === transactionId),
+  };
+  const transactionIndex = DUMMY_TRANSACTION.findIndex(
+    (t) => t.tid === transactionId
+  );
+  updatedTransaction.category = category;
+  updatedTransaction.title = title;
+  updatedTransaction.amount = amount;
+  updatedTransaction.transaction_type = transaction_type;
+  updatedTransaction.memo = memo;
+
+  DUMMY_TRANSACTION[transactionIndex] = updatedTransaction;
+
+  res.status(200).json({ transaction: updatedTransaction });
+};
+
+const deleteTransaction = (req, res, next) => {
+  const transactionId = req.params.tid;
+  DUMMY_TRANSACTION = DUMMY_TRANSACTION.filter((t) => t.tid !== transactionId);
+
+  res.status(200).json({ message: "삭제 완료", transactionId });
+};
+
 exports.getTransactionById = getTransactionById;
-exports.getTransactionByUserId = getTransactionByUserId;
+exports.getTransactionsByUserId = getTransactionsByUserId;
 exports.createTransaction = createTransaction;
+exports.updateTransaction = updateTransaction;
+exports.deleteTransaction = deleteTransaction;

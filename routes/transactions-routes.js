@@ -7,8 +7,12 @@ const transactionsControllers = require("../controllers/transactions-controller"
 //라우트에 요청이 도달하면 실행되는 함수
 router.get("/:tid", transactionsControllers.getTransactionById);
 
-router.get("/user/:uid", transactionsControllers.getTransactionByUserId);
+router.get("/user/:uid", transactionsControllers.getTransactionsByUserId);
 
 router.post("/", transactionsControllers.createTransaction);
+
+router.patch("/:tid", transactionsControllers.updateTransaction);
+
+router.delete("/:tid", transactionsControllers.deleteTransaction);
 
 module.exports = router;
