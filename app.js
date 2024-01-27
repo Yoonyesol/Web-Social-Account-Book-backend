@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 
 const app = express();
@@ -6,6 +8,7 @@ const transactionsRouter = require("./routes/transactions-routes");
 const HttpError = require("./models/http-error");
 
 const bodyParser = require("body-parser");
+const { default: mongoose } = require("mongoose");
 
 app.use(bodyParser.json());
 
@@ -25,4 +28,12 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "정의되지 않은 에러 발생" });
 });
 
-app.listen(5000);
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    //db 연결이 성공할 경우 서버 연결
+    app.listen(5000);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
