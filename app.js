@@ -1,14 +1,13 @@
 require("dotenv").config();
 
 const express = require("express");
-
-const app = express();
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 
 const transactionsRouter = require("./routes/transactions-routes");
 const HttpError = require("./models/http-error");
 
-const bodyParser = require("body-parser");
-const { default: mongoose } = require("mongoose");
+const app = express();
 
 app.use(bodyParser.json());
 

@@ -1,45 +1,40 @@
 const { v4: uuid } = require("uuid");
+const { validationResult } = require("express-validator");
+
 const HttpError = require("../models/http-error");
+const Transaction = require("../models/transaction");
 
 let DUMMY_TRANSACTION = [
   {
-    tid: "t1",
     uid: "u1",
     date: 1705029633942,
     category: "교통/차량",
     title: "버스비",
     amount: -4000,
-    transaction_type: "지출",
     memo: "버스비",
   },
   {
-    tid: "t2",
     uid: "u2",
     date: 1705129633942,
     category: "용돈",
     title: "용돈",
     amount: 12000,
-    transaction_type: "수입",
     memo: "",
   },
   {
-    tid: "t3",
     uid: "u1",
     date: 1705229633942,
     category: "문화비",
     title: "서적구매",
     amount: -25000,
-    transaction_type: "지출",
     memo: "컴퓨터공학입문서 구입",
   },
   {
-    tid: "t4",
     uid: "u2",
     date: 1709329633942,
     category: "식비",
     title: "외식비",
     amount: -52000,
-    transaction_type: "지출",
     memo: "외식",
   },
 ];
@@ -73,19 +68,29 @@ const getTransactionsByUserId = (req, res, next) => {
   res.json({ transactions });
 };
 
-const createTransaction = (req, res, next) => {
-  const { uid, category, title, amount, transaction_type, memo } = req.body;
-  const createdTransaction = {
-    tid: uuid(),
+const createTransaction = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(HttpError(errors.array(), 422));
+  }
+  const { uid, category, title, amount, memo } = req.body;
+
+  //모델 생성 완료
+  const createdTransaction = new Transaction({
     uid,
+    date: new Date().getTime(),
     category,
     title,
     amount,
-    transaction_type,
     memo,
-  };
+  });
 
-  DUMMY_TRANSACTION.push(createdTransaction);
+  try {
+    await createdTransaction.save();
+  } catch (e) {
+    const error = new HttpError("입출금 내역 저장 실패", 500);
+    return next(error);
+  }
 
   res.status(201).json({ transaction: createdTransaction });
 };
