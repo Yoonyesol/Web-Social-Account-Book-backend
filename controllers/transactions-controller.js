@@ -1,43 +1,7 @@
-const { v4: uuid } = require("uuid");
 const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
 const Transaction = require("../models/transaction");
-
-let DUMMY_TRANSACTION = [
-  {
-    uid: "u1",
-    date: 1705029633942,
-    category: "교통/차량",
-    title: "버스비",
-    amount: -4000,
-    memo: "버스비",
-  },
-  {
-    uid: "u2",
-    date: 1705129633942,
-    category: "용돈",
-    title: "용돈",
-    amount: 12000,
-    memo: "",
-  },
-  {
-    uid: "u1",
-    date: 1705229633942,
-    category: "문화비",
-    title: "서적구매",
-    amount: -25000,
-    memo: "컴퓨터공학입문서 구입",
-  },
-  {
-    uid: "u2",
-    date: 1709329633942,
-    category: "식비",
-    title: "외식비",
-    amount: -52000,
-    memo: "외식",
-  },
-];
 
 const getTransactionById = async (req, res, next) => {
   const transactionId = req.params.tid; // type: string
@@ -90,12 +54,12 @@ const createTransaction = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return next(HttpError(errors.array(), 422));
   }
-  const { uid, category, title, amount, memo } = req.body;
+  const { uid, date, category, title, amount, memo } = req.body;
 
   //모델 생성 완료
   const createdTransaction = new Transaction({
     uid,
-    date: new Date().getTime(),
+    date,
     category,
     title,
     amount,
@@ -154,7 +118,6 @@ const updateTransaction = async (req, res, next) => {
 
 const deleteTransaction = async (req, res, next) => {
   const transactionId = req.params.tid;
-  DUMMY_TRANSACTION = DUMMY_TRANSACTION.filter((t) => t.tid !== transactionId);
 
   let transaction;
   try {

@@ -11,6 +11,17 @@ const app = express();
 
 app.use(bodyParser.json());
 
+//cors 에러 해결
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+  next();
+});
+
 app.use("/api/transactions", transactionsRouter);
 
 // 앞선 라우트에게서 응답을 받지 못했을 경우에만 실행
