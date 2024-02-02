@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const TransactionSchema = new Schema({
   uid: { type: String, required: true },
-  date: { type: Date, required: true },
+  date: { type: Number, required: true },
   category: { type: String, required: true },
   title: { type: String, required: true },
   amount: { type: Number, required: true },
