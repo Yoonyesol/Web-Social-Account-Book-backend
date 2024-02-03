@@ -54,11 +54,13 @@ const createTransaction = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return next(HttpError(errors.array(), 422));
   }
-  const { uid, date, category, title, amount, memo } = req.body;
+  const { uid, transaction_type, date, category, title, amount, memo } =
+    req.body;
 
   //모델 생성 완료
   const createdTransaction = new Transaction({
     uid,
+    transaction_type,
     date,
     category,
     title,
@@ -85,7 +87,7 @@ const updateTransaction = async (req, res, next) => {
     return next(HttpError(errors.array(), 422));
   }
 
-  const { date, category, title, amount, memo } = req.body;
+  const { transaction_type, date, category, title, amount, memo } = req.body;
   const transactionId = req.params.tid;
 
   //id로 해당 입출금 내역 불러오기
@@ -98,6 +100,7 @@ const updateTransaction = async (req, res, next) => {
   }
 
   //내용 업데이트
+  transaction.transaction_type = transaction_type;
   transaction.date = date;
   transaction.category = category;
   transaction.title = title;
