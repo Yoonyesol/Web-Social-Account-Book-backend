@@ -3,8 +3,16 @@ const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 
-const getUsers = (req, res, next) => {
-  res.json({ users: DUMMY_USER });
+const getUsers = async (req, res, next) => {
+  let users;
+  try {
+    users = await User.find({}, "-password"); //비밀번호 제외한 모든 정보 가져오기
+  } catch (err) {
+    const error = new HttpError("유저 정보를 가져오는 데 실패했습니다.", 500);
+    return next(error);
+  }
+
+  res.json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
 const signUp = async (req, res, next) => {
