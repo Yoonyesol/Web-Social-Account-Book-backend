@@ -2,6 +2,8 @@ const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
 const Transaction = require("../models/transaction");
+const User = require("../models/user");
+const { default: mongoose } = require("mongoose");
 
 const getTransactionById = async (req, res, next) => {
   const transactionId = req.params.tid; // type: string
@@ -68,8 +70,31 @@ const createTransaction = async (req, res, next) => {
     memo,
   });
 
+  //유저 id 존재 여부 확인
+  let user;
   try {
-    await createdTransaction.save();
+    user = await User.findById(uid);
+  } catch (err) {
+    const error = new HttpError("유저id가 존재하지 않습니다.", 500);
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new HttpError(
+      "주어진 id에 해당하는 사용자가 존재하지 않습니다.",
+      500
+    );
+    return next(error);
+  }
+
+  try {
+    //새로운 가계부 생성 시 시작되는 세션
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createdTransaction.save({ session: sess }); //새로운 가계부 생성. 자동으로 가계부 고유 id 생성
+    user.transactions.push(createdTransaction); //mongoose 내부에서 참조하는 두 개의 모델 연결
+    await user.save({ session: sess }); //업데이트한 문서 저장
+    await sess.commitTransaction(); //세션이 트랜잭션 커밋
   } catch (e) {
     const error = new HttpError(
       "해당 ID의 입출금내역을 불러오지 못했습니다.",

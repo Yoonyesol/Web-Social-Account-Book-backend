@@ -13,7 +13,7 @@ const signUp = async (req, res, next) => {
     return next(new HttpError("유효하지 않은 데이터가 존재합니다.", 422));
   }
 
-  const { name, email, password, transactions, communityPosts } = req.body;
+  const { name, email, password } = req.body;
 
   //기존 등록된 이메일인지 확인
   let existingUser;
@@ -39,8 +39,8 @@ const signUp = async (req, res, next) => {
     image:
       "https://www.google.com/url?sa=i&url=https%3A%2F%2Fgongu.copyright.or.kr%2Fgongu%2Fwrt%2Fwrt%2Fview.do%3FwrtSn%3D9046601%26menuNo%3D200018&psig=AOvVaw3wWURbvBWruX9ZYmAlvBnx&ust=1707057306920000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCLjtj56yj4QDFQAAAAAdAAAAABAE",
     password,
-    transactions,
-    communityPosts,
+    transactions: [], //새 장소가 추가되면 자동으로 배열에 추가
+    communityPosts: [],
   });
 
   try {

@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const TransactionSchema = new Schema({
-  uid: { type: String, required: true },
+  //mongoose.Types.ObjectId: 생성한 사용자에 대한 실제 id 생성
+  uid: { type: mongoose.Types.ObjectId, ref: "User", required: true },
   transaction_type: { type: Boolean, require },
   date: { type: Number, required: true },
   category: { type: String, required: true },
