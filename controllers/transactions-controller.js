@@ -149,14 +149,29 @@ const deleteTransaction = async (req, res, next) => {
 
   let transaction;
   try {
-    transaction = await Transaction.findById(transactionId);
+    //몽구스가 uid를 가지고 User 데이터 전체를 대상으로 검색. 이 검색결과로 해당 User의 모든 정보를 불러온다.
+    transaction = await Transaction.findById(transactionId).populate("uid");
   } catch (e) {
     const error = new HttpError("입출금내역을 불러오지 못했습니다.", 500);
     return next(error);
   }
 
+  //존재하지 않는 가계부인 경우
+  if (!transaction) {
+    const error = new HttpError("해당 id의 가계부를 찾지 못했습니다.", 500);
+    return next(error);
+  }
+
+  //가계부 삭제
   try {
-    await transaction.deleteOne({ id: transactionId });
+    //문서에서 가계부 삭제
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await transaction.deleteOne({ session: sess });
+    transaction.uid.transactions.pull(transaction); //pull을 이용해 transaction 호출, 자동으로 id 제거
+    //새로 생성된 사용자를 db에 저장
+    await transaction.uid.save({ session: sess });
+    await sess.commitTransaction();
   } catch (e) {
     const error = new HttpError("입출금내역을 삭제하지 못했습니다.", 500);
     return next(error);
