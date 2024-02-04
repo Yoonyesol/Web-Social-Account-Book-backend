@@ -4,7 +4,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
-const transactionsRouter = require("./routes/transactions-routes");
+const transactionsRoutes = require("./routes/transactions-routes");
+const userRoutes = require("./routes/users-routes");
 const HttpError = require("./models/http-error");
 
 const app = express();
@@ -22,7 +23,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/api/transactions", transactionsRouter);
+app.use("/api/transactions", transactionsRoutes);
+app.use("/api/users", userRoutes);
 
 // 앞선 라우트에게서 응답을 받지 못했을 경우에만 실행
 app.use((req, res, next) => {
