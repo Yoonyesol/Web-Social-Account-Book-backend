@@ -88,7 +88,16 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ message: "로그인 성공!" });
+  const userInfo = new User({
+    id: existingUser.id,
+    email: existingUser.email,
+    name: existingUser.username,
+    image: existingUser.image,
+    transactions: existingUser.transactions,
+    communityPosts: existingUser.communityPosts,
+  });
+
+  res.json({ userInfo: userInfo.toObject({ getters: true }) });
 };
 
 exports.getUsers = getUsers;
