@@ -8,7 +8,10 @@ const getUsers = async (req, res, next) => {
   try {
     users = await User.find({}, "-password"); //비밀번호 제외한 모든 정보 가져오기
   } catch (err) {
-    const error = new HttpError("유저 정보를 가져오는 데 실패했습니다.", 500);
+    const error = new HttpError(
+      "유저 정보를 가져오는 데 실패했습니다. 잠시 후 다시 시도 해주세요.",
+      500
+    );
     return next(error);
   }
 
@@ -29,14 +32,17 @@ const signUp = async (req, res, next) => {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new HttpError(
-      "회원가입에 실패했습니다.(기존 이메일 확인 절차 실패)",
+      "회원가입에 실패했습니다. 잠시 후 다시 시도 해주세요.(기존 이메일 확인 절차 실패)",
       500
     );
     return next(error);
   }
 
   if (existingUser) {
-    const error = new HttpError("이미 등록된 이메일이 존재합니다.", 422);
+    const error = new HttpError(
+      "이미 등록된 이메일이 존재합니다. 다른 이메일로 회원가입 해주세요.",
+      422
+    );
     return next(error);
   }
 
@@ -55,7 +61,7 @@ const signUp = async (req, res, next) => {
     await createdUser.save();
   } catch (err) {
     const error = new HttpError(
-      "회원가입에 실패했습니다. 재시도 해주세요.(새로운 회원 정보 저장 실패)",
+      "회원가입에 실패했습니다. 잠시 후 다시 시도 해주세요.(새로운 회원 정보 저장 실패)",
       500
     );
     return next(error);
@@ -73,7 +79,7 @@ const login = async (req, res, next) => {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new HttpError(
-      "로그인에 실패했습니다.(로그인 데이터베이스 접근 실패)",
+      "로그인에 실패했습니다. 잠시 후 다시 시도 해주세요.(로그인 데이터베이스 접근 실패)",
       500
     );
     return next(error);
