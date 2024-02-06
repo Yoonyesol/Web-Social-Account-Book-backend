@@ -91,7 +91,7 @@ const login = async (req, res, next) => {
   const userInfo = new User({
     id: existingUser.id,
     email: existingUser.email,
-    name: existingUser.username,
+    name: existingUser.name,
     image: existingUser.image,
     transactions: existingUser.transactions,
     communityPosts: existingUser.communityPosts,
