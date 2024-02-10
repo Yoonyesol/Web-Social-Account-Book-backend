@@ -10,6 +10,7 @@ const communitySchema = new Schema({
   },
   date: { type: Date, default: Date.now, required: true },
   category: { type: String, required: true },
+  title: { type: String, required: true },
   content: { type: String, required: true },
   hit: { type: Number, default: 0, required: true },
   like: [{ type: mongoose.Types.ObjectId, ref: "User" }],

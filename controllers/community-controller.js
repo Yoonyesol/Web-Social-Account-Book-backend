@@ -40,7 +40,7 @@ const getPostById = async (req, res, next) => {
 
 //유저 ID로 게시글 가져오기
 const getPostByUid = async (req, res, next) => {
-  const userId = req.params.cid;
+  const userId = req.params.uid;
 
   let posts;
   try {
@@ -64,7 +64,7 @@ const createPost = async (req, res, next) => {
     return next(HttpError(errors.array(), 422));
   }
 
-  const { writer, date, category, content } = req.body;
+  const { writer, date, category, title, content } = req.body;
 
   let user;
   try {
@@ -90,6 +90,7 @@ const createPost = async (req, res, next) => {
     },
     date,
     category,
+    title,
     content,
   });
 
