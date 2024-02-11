@@ -109,7 +109,39 @@ const createPost = async (req, res, next) => {
   res.status(201).json({ post: createdPost });
 };
 
+const updatePost = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(HttpError(errors.array(), 422));
+  }
+
+  const { category, title, content } = req.body;
+  const postId = req.params.cid;
+
+  let post;
+  try {
+    post = await Community.findById(postId);
+  } catch (e) {
+    const error = new HttpError("해당 ID의 게시글을 불러오지 못했습니다.", 500);
+    return next(error);
+  }
+
+  post.category = category;
+  post.title = title;
+  post.content = content;
+
+  try {
+    await post.save();
+  } catch (e) {
+    const error = new HttpError("게시글 수정 실패", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ post: post.toObject({ getters: true }) });
+};
+
 exports.getPosts = getPosts;
 exports.getPostById = getPostById;
 exports.getPostByUid = getPostByUid;
 exports.createPost = createPost;
+exports.updatePost = updatePost;
