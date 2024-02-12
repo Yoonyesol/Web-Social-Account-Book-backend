@@ -140,8 +140,40 @@ const updatePost = async (req, res, next) => {
   res.status(200).json({ post: post.toObject({ getters: true }) });
 };
 
+const deletePost = async (req, res, next) => {
+  const postId = req.params.cid;
+
+  let post;
+  try {
+    post = await Community.findById(postId).populate("writer.uid");
+  } catch (e) {
+    const error = new HttpError("게시글을 불러올 수 없습니다.", 500);
+    return next(error);
+  }
+
+  if (!post) {
+    const error = new HttpError("게시글을 찾을 수 없습니다.", 500);
+    return next(error);
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await post.deleteOne({ session: sess });
+    post.writer.uid.posts.pull(post);
+    await post.writer.uid.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (e) {
+    const error = new HttpError("게시글을 삭제하지 못했습니다.", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ message: "삭제 완료", postId });
+};
+
 exports.getPosts = getPosts;
 exports.getPostById = getPostById;
 exports.getPostByUid = getPostByUid;
 exports.createPost = createPost;
 exports.updatePost = updatePost;
+exports.deletePost = deletePost;

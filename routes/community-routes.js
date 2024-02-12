@@ -9,5 +9,6 @@ router.get("/:cid", communityControllers.getPostById);
 router.get("/user/:uid", communityControllers.getPostByUid);
 router.post("/", communityControllers.createPost);
 router.patch("/:cid", communityControllers.updatePost);
+router.delete("/:cid", communityControllers.deletePost);
 
 module.exports = router;
