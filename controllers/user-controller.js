@@ -97,7 +97,7 @@ const login = async (req, res, next) => {
   }
 
   //이메일 존재 여부, 비밀번호 일치하는지 검사
-  if (!existingUser || existingUser.password !== password) {
+  if (!existingUser) {
     const error = new HttpError(
       "이메일 혹은 비밀번호가 일치하지 않습니다.",
       401
@@ -105,7 +105,30 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ userInfo: existingUser.toObject({ getters: true }) });
+  //입력받은 비밀번호와 기존 회원의 비밀번호 비교
+  let isValidPassword = false;
+  try {
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
+  } catch (err) {
+    const error = new HttpError(
+      "비밀번호가 일치하지 않습니다. 비밀번호를 확인 후 다시 시도해주세요.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!isValidPassword) {
+    const error = new HttpError(
+      "이메일 혹은 비밀번호가 일치하지 않습니다.",
+      401
+    );
+    return next(error);
+  }
+
+  res.json({
+    message: "로그인 성공!",
+    userInfo: existingUser.toObject({ getters: true }),
+  });
 };
 
 exports.getUsers = getUsers;
