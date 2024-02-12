@@ -1,4 +1,5 @@
 const { validationResult } = require("express-validator");
+const bcrypt = require("bcryptjs");
 
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
@@ -46,13 +47,23 @@ const signUp = async (req, res, next) => {
     return next(error);
   }
 
+  let hashedPassword;
+  try {
+    const saltRound = 10;
+    const salt = await bcrypt.genSalt(saltRound);
+    hashedPassword = await bcrypt.hash(password, salt);
+  } catch (err) {
+    const error = new HttpError("유저를 생성할 수 없습니다.", 500);
+    return next(error);
+  }
+
   //회원가입
   const createdUser = new User({
     name,
     email,
     image:
       "https://www.google.com/url?sa=i&url=https%3A%2F%2Fgongu.copyright.or.kr%2Fgongu%2Fwrt%2Fwrt%2Fview.do%3FwrtSn%3D9046601%26menuNo%3D200018&psig=AOvVaw3wWURbvBWruX9ZYmAlvBnx&ust=1707057306920000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCLjtj56yj4QDFQAAAAAdAAAAABAE",
-    password,
+    password: hashedPassword,
     transactions: [], //새 장소가 추가되면 자동으로 배열에 추가
     communityPosts: [],
   });
