@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
@@ -78,7 +79,24 @@ const signUp = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: createdUser.id, email: createdUser.email }, //토큰에 인코딩할 정보
+      "social_accountbook_secret_key_important", //private key
+      { expiresIn: "3h" } //만료기간
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "회원가입에 실패했습니다. 잠시 후 다시 시도 해주세요.",
+      500
+    );
+    return next(error);
+  }
+
+  res
+    .status(201)
+    .json({ userId: createdUser.id, email: createdUser.email, token: token });
 };
 
 const login = async (req, res, next) => {
@@ -125,9 +143,22 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: existingUser.id, email: existingUser.email },
+      "social_accountbook_secret_key_important", //private key
+      { expiresIn: "3h" } //만료기간
+    );
+  } catch (err) {
+    const error = new HttpError("로그인에 실패했습니다. 재시도 해주세요.", 500);
+    return next(error);
+  }
+
   res.json({
-    message: "로그인 성공!",
-    userInfo: existingUser.toObject({ getters: true }),
+    user: existingUser.id,
+    email: existingUser.email,
+    token: token,
   });
 };
 
