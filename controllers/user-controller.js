@@ -82,7 +82,11 @@ const signUp = async (req, res, next) => {
   let token;
   try {
     token = jwt.sign(
-      { userId: createdUser.id, email: createdUser.email }, //토큰에 인코딩할 정보
+      {
+        userId: createdUser.id,
+        email: createdUser.email,
+        name: createdUser.name,
+      }, //토큰에 인코딩할 정보
       "social_accountbook_secret_key_important", //private key
       { expiresIn: "3h" } //만료기간
     );
@@ -94,9 +98,12 @@ const signUp = async (req, res, next) => {
     return next(error);
   }
 
-  res
-    .status(201)
-    .json({ userId: createdUser.id, email: createdUser.email, token: token });
+  res.status(201).json({
+    userId: createdUser.id,
+    email: createdUser.email,
+    name: createdUser.name,
+    token: token,
+  });
 };
 
 const login = async (req, res, next) => {
@@ -146,7 +153,11 @@ const login = async (req, res, next) => {
   let token;
   try {
     token = jwt.sign(
-      { userId: existingUser.id, email: existingUser.email },
+      {
+        userId: existingUser.id,
+        email: existingUser.email,
+        name: existingUser.name,
+      },
       "social_accountbook_secret_key_important", //private key
       { expiresIn: "3h" } //만료기간
     );
@@ -156,8 +167,9 @@ const login = async (req, res, next) => {
   }
 
   res.json({
-    user: existingUser.id,
+    userId: existingUser.id,
     email: existingUser.email,
+    name: existingUser.name,
     token: token,
   });
 };
