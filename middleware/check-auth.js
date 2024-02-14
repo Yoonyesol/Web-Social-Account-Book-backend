@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const jwt = require("jsonwebtoken");
 
 const HttpError = require("../models/http-error");
@@ -24,10 +26,7 @@ module.exports = (req, res, next) => {
     }
 
     // 토큰이 존재하는 경우 토큰 검증. 반환값은 토큰에 부호화된 페이로드
-    const decodedToken = jwt.verify(
-      token,
-      "social_accountbook_secret_key_important"
-    );
+    const decodedToken = jwt.verify(token, process.env.JWT_KEY);
 
     req.useData = { userId: decodedToken.userId }; // 사용자 id 추출
     next(); // 인증 요구 라우트로 이동

@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -87,7 +89,7 @@ const signUp = async (req, res, next) => {
         email: createdUser.email,
         name: createdUser.name,
       }, //토큰에 인코딩할 정보
-      "social_accountbook_secret_key_important", //private key
+      process.env.JWT_KEY, //private key
       { expiresIn: "3h" } //만료기간
     );
   } catch (err) {
@@ -160,7 +162,7 @@ const login = async (req, res, next) => {
         email: existingUser.email,
         name: existingUser.name,
       },
-      "social_accountbook_secret_key_important", //private key
+      process.env.JWT_KEY, //private key
       { expiresIn: "3h" } //만료기간
     );
   } catch (err) {
