@@ -85,7 +85,7 @@ const signUp = async (req, res, next) => {
   try {
     token = jwt.sign(
       {
-        userId: createdUser.id,
+        userId: createdUser._id,
         email: createdUser.email,
         name: createdUser.name,
       }, //토큰에 인코딩할 정보
@@ -102,7 +102,7 @@ const signUp = async (req, res, next) => {
 
   res.status(201).json({
     userInfo: {
-      userId: createdUser.id,
+      userId: createdUser._id,
       email: createdUser.email,
       name: createdUser.name,
     },
@@ -158,7 +158,7 @@ const login = async (req, res, next) => {
   try {
     token = jwt.sign(
       {
-        userId: existingUser.id,
+        userId: existingUser._id,
         email: existingUser.email,
         name: existingUser.name,
       },
@@ -172,7 +172,7 @@ const login = async (req, res, next) => {
 
   res.json({
     userInfo: {
-      userId: existingUser.id,
+      userId: existingUser._id,
       email: existingUser.email,
       name: existingUser.name,
     },

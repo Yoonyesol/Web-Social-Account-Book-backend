@@ -124,6 +124,15 @@ const updateTransaction = async (req, res, next) => {
     return next(error);
   }
 
+  //생성자가 아니면 내용 수정 불가
+  if (transaction.uid.toString() !== req.userData.userId) {
+    const error = new HttpError(
+      "입출금내역을 업데이트할 수 있는 권한이 없습니다.",
+      401
+    );
+    return next(error);
+  }
+
   //내용 업데이트
   transaction.transaction_type = transaction_type;
   transaction.date = date;
@@ -159,6 +168,15 @@ const deleteTransaction = async (req, res, next) => {
   //존재하지 않는 가계부인 경우
   if (!transaction) {
     const error = new HttpError("해당 id의 가계부를 찾지 못했습니다.", 500);
+    return next(error);
+  }
+
+  //생성자가 아니면 내용 수정 불가
+  if (transaction.uid.toString() !== req.userData.userId) {
+    const error = new HttpError(
+      "입출금내역을 삭제할 수 있는 권한이 없습니다.",
+      401
+    );
     return next(error);
   }
 

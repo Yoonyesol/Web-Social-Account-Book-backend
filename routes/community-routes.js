@@ -9,7 +9,7 @@ router.get("/", communityControllers.getPosts);
 router.get("/:cid", communityControllers.getPostById);
 router.get("/user/:uid", communityControllers.getPostByUid);
 
-router.get(checkAuth);
+router.use(checkAuth);
 
 router.post("/", communityControllers.createPost);
 router.patch("/:cid", communityControllers.updatePost);

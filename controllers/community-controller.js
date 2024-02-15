@@ -126,6 +126,14 @@ const updatePost = async (req, res, next) => {
     return next(error);
   }
 
+  if (post.writer.uid.toString() !== req.userData.userId) {
+    const error = new HttpError(
+      "게시글을 수정할 수 있는 권한이 없습니다.",
+      401
+    );
+    return next(error);
+  }
+
   post.category = category;
   post.title = title;
   post.content = content;
@@ -153,6 +161,14 @@ const deletePost = async (req, res, next) => {
 
   if (!post) {
     const error = new HttpError("게시글을 찾을 수 없습니다.", 500);
+    return next(error);
+  }
+
+  if (post.writer.uid._id.toString() !== req.userData.userId) {
+    const error = new HttpError(
+      "게시글을 삭제할 수 있는 권한이 없습니다.",
+      401
+    );
     return next(error);
   }
 
