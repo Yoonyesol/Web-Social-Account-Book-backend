@@ -4,14 +4,12 @@ const uniqueValidator = require("mongoose-unique-validator");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-  name: { type: String, require: true },
-  email: { type: String, require: true, unique: true },
-  password: { type: String, require: true, minlength: 6 },
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true, minlength: 6 },
   image: { type: String },
-  transactions: [
-    { type: Schema.Types.ObjectId, ref: "Transaction", require: true },
-  ],
-  posts: [{ type: Schema.Types.ObjectId, ref: "Community", require: true }],
+  transactions: [{ type: Schema.Types.ObjectId, ref: "Transaction" }],
+  posts: [{ type: Schema.Types.ObjectId, ref: "Community" }],
   likedPosts: [{ type: Schema.Types.ObjectId, ref: "Community" }],
   comments: [{ type: Schema.Types.ObjectId, ref: "Community" }],
 });
