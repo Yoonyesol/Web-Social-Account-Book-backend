@@ -3,7 +3,7 @@ const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 const Transaction = require("../models/transaction");
 const User = require("../models/user");
-const { mongoose } = require("mongoose");
+const mongoose = require("mongoose");
 
 const getTransactionById = async (req, res, next) => {
   const transactionId = req.params.tid; // type: string
@@ -172,7 +172,7 @@ const deleteTransaction = async (req, res, next) => {
   }
 
   //생성자가 아니면 내용 수정 불가
-  if (transaction.uid.toString() !== req.userData.userId) {
+  if (transaction.uid._id.toString() !== req.userData.userId) {
     const error = new HttpError(
       "입출금내역을 삭제할 수 있는 권한이 없습니다.",
       401
