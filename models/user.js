@@ -8,6 +8,12 @@ const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, minlength: 6 },
   image: { type: String },
+  budgets: [
+    {
+      monthYear: { type: String, required: true },
+      amount: { type: Number, default: 0, required: true },
+    },
+  ],
   transactions: [{ type: Schema.Types.ObjectId, ref: "Transaction" }],
   posts: [{ type: Schema.Types.ObjectId, ref: "Community" }],
   likedPosts: [{ type: Schema.Types.ObjectId, ref: "Community" }],
