@@ -4,6 +4,7 @@ const HttpError = require("../models/http-error");
 const Transaction = require("../models/transaction");
 const User = require("../models/user");
 const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 
 const getTransactionById = async (req, res, next) => {
   const transactionId = req.params.tid; // type: string
@@ -198,8 +199,72 @@ const deleteTransaction = async (req, res, next) => {
   res.status(200).json({ message: "삭제 완료", transactionId });
 };
 
+const getMonthlyTransactions = async (req, res, next) => {
+  const { uid, date } = req.params;
+  const [year, month] = date.split("-");
+  const firstDay = new Date(parseInt(year), parseInt(month) - 1, 1).getTime();
+  const lastDay = new Date(
+    parseInt(year),
+    parseInt(month),
+    0,
+    23,
+    59,
+    59
+  ).getTime();
+
+  let income, expense;
+  try {
+    // 특정 월의 수입을 계산
+    income = await Transaction.aggregate([
+      {
+        $match: {
+          uid: new ObjectId(uid),
+          transaction_type: true, // 수입인 경우 필터링
+          date: { $gte: firstDay, $lte: lastDay }, // 특정 월의 데이터만 선택
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" }, // 수입의 총합 계산
+        },
+      },
+    ]);
+
+    // 특정 월의 지출을 계산
+    expense = await Transaction.aggregate([
+      {
+        $match: {
+          uid: new ObjectId(uid),
+          transaction_type: false, // 지출인 경우 필터링
+          date: { $gte: firstDay, $lte: lastDay }, // 특정 월의 데이터만 선택
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$amount" }, // 지출의 총합 계산
+        },
+      },
+    ]);
+  } catch (err) {
+    const error = new HttpError(
+      "요청한 월별 입출금 합계를 불러오지 못했습니다:",
+      err
+    );
+    return next(error);
+  }
+
+  // 배열이 비어있을 경우 0 리턴
+  res.json({
+    income: income[0]?.total || 0,
+    expense: expense[0]?.total || 0,
+  });
+};
+
 exports.getTransactionById = getTransactionById;
 exports.getTransactionsByUserId = getTransactionsByUserId;
 exports.createTransaction = createTransaction;
 exports.updateTransaction = updateTransaction;
 exports.deleteTransaction = deleteTransaction;
+exports.getMonthlyTransactions = getMonthlyTransactions;
