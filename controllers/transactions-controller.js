@@ -262,9 +262,72 @@ const getMonthlyTransactions = async (req, res, next) => {
   });
 };
 
+const getLatestYearExpenses = async (req, res, next) => {
+  const userId = req.params.uid;
+  let monthlyExpenses = [];
+  let totalYearlyExpense = 0;
+
+  try {
+    const currentDate = new Date();
+
+    for (let i = 11; i >= 0; i--) {
+      const firstDayOfMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() - i,
+        1
+      ).getTime();
+      const lastDayOfMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() - i + 1,
+        0,
+        23,
+        59,
+        59
+      ).getTime();
+
+      const expenses = await Transaction.aggregate([
+        {
+          $match: {
+            uid: new ObjectId(userId),
+            transaction_type: false,
+            date: { $gte: firstDayOfMonth, $lte: lastDayOfMonth },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$amount" },
+          },
+        },
+      ]);
+
+      const totalExpense = expenses.length > 0 ? expenses[0].total : 0;
+      totalYearlyExpense += totalExpense;
+
+      monthlyExpenses.push({
+        year: new Date(firstDayOfMonth).getFullYear(),
+        month: new Date(firstDayOfMonth).getMonth() + 1,
+        total: totalExpense,
+      });
+    }
+  } catch (err) {
+    const error = new HttpError(
+      "요청한 최근 1년 지출을 불러오지 못했습니다:",
+      err
+    );
+    return next(error);
+  }
+
+  res.status(200).json({
+    monthlyExpenses,
+    totalYearlyExpense,
+  });
+};
+
 exports.getTransactionById = getTransactionById;
 exports.getTransactionsByUserId = getTransactionsByUserId;
 exports.createTransaction = createTransaction;
 exports.updateTransaction = updateTransaction;
 exports.deleteTransaction = deleteTransaction;
 exports.getMonthlyTransactions = getMonthlyTransactions;
+exports.getLatestYearExpenses = getLatestYearExpenses;

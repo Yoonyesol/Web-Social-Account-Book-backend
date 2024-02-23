@@ -9,6 +9,10 @@ const checkAuth = require("../middleware/check-auth");
 router.get("/:tid", transactionsControllers.getTransactionById);
 router.get("/user/:uid", transactionsControllers.getTransactionsByUserId);
 router.get("/:uid/:date", transactionsControllers.getMonthlyTransactions);
+router.get(
+  "/user/latestExpenses/:uid",
+  transactionsControllers.getLatestYearExpenses
+);
 
 //이 아래 라우트부터는 토큰을 검증하여 접근가능.(라우트 보호)
 router.use(checkAuth);
