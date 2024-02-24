@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const transactionsRoutes = require("./routes/transactions-routes");
 const userRoutes = require("./routes/users-routes");
 const communityRoutes = require("./routes/community-routes");
+const commentRoutes = require("./routes/comments-routes");
 const HttpError = require("./models/http-error");
 
 const app = express();
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 app.use("/api/transactions", transactionsRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/community", communityRoutes);
+app.use("/api/comment", commentRoutes);
 
 // 앞선 라우트에게서 응답을 받지 못했을 경우에만 실행
 app.use((req, res, next) => {

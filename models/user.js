@@ -17,7 +17,7 @@ const userSchema = new Schema({
   transactions: [{ type: Schema.Types.ObjectId, ref: "Transaction" }],
   posts: [{ type: Schema.Types.ObjectId, ref: "Community" }],
   likedPosts: [{ type: Schema.Types.ObjectId, ref: "Community" }],
-  comments: [{ type: Schema.Types.ObjectId, ref: "Community" }],
+  comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
 });
 
 userSchema.plugin(uniqueValidator);
