@@ -7,7 +7,7 @@ const commentSchema = new Schema({
   authorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   authorName: { type: String, required: true },
   content: { type: String, required: true },
-  createdAt: { type: Number, default: new Date().getTime() },
+  createdAt: { type: Number, default: Date.now },
 });
 
 module.exports = mongoose.model("Comment", commentSchema);

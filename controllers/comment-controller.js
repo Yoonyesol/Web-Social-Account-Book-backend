@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 const HttpError = require("../models/http-error");
 const Comment = require("../models/comment");
 const User = require("../models/user");
+const Community = require("../models/community");
 const mongoose = require("mongoose");
 
 const getCommentsByPostId = async (req, res, next) => {
@@ -78,12 +79,33 @@ const createComment = async (req, res, next) => {
     return next(error);
   }
 
+  let post;
+  try {
+    post = await Community.findById(postId);
+  } catch (err) {
+    const error = new HttpError("게시물id가 존재하지 않습니다.", 500);
+    return next(error);
+  }
+
+  if (!post) {
+    const error = new HttpError(
+      "주어진 id에 해당하는 게시물을 찾을 수 없습니다.",
+      404
+    );
+    return next(error);
+  }
+
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await createdComment.save({ session: sess });
+
     user.comments.push(createdComment);
     await user.save({ session: sess });
+
+    post.comments.push(createdComment);
+    await post.save({ session: sess });
+
     await sess.commitTransaction();
   } catch (e) {
     const error = new HttpError(

@@ -14,13 +14,7 @@ const communitySchema = new Schema({
   content: { type: String, required: true },
   hit: { type: Number, default: 0, required: true },
   like: [{ type: mongoose.Types.ObjectId, ref: "User" }],
-  comments: [
-    {
-      writer: { type: Schema.Types.ObjectId, ref: "User", required: true },
-      content: { type: String, required: true },
-      date: { type: Date, default: Date.now, required: true },
-    },
-  ],
+  comments: [{ type: mongoose.Types.ObjectId, ref: "Comment" }],
 });
 
 module.exports = mongoose.model("Community", communitySchema);
