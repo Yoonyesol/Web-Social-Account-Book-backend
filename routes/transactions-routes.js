@@ -13,6 +13,10 @@ router.get(
   "/user/latestExpenses/:uid",
   transactionsControllers.getLatestYearExpenses
 );
+router.get(
+  "/user/:uid/expense/category/top5",
+  transactionsControllers.getExpensesTop5Categories
+);
 
 //이 아래 라우트부터는 토큰을 검증하여 접근가능.(라우트 보호)
 router.use(checkAuth);

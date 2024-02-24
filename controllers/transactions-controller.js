@@ -324,6 +324,82 @@ const getLatestYearExpenses = async (req, res, next) => {
   });
 };
 
+const getExpensesTop5Categories = async (req, res, next) => {
+  const userId = req.params.uid;
+  let categoryExpenseRatio;
+
+  try {
+    const currentDate = new Date();
+    const firstDayOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    ).getTime();
+    const lastDayOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0,
+      23,
+      59,
+      59
+    ).getTime();
+
+    const transactions = await Transaction.find({
+      uid: new ObjectId(userId),
+      transaction_type: false,
+      date: { $gte: firstDayOfMonth, $lte: lastDayOfMonth },
+    });
+
+    // 각 카테고리별 지출 총액 계산
+    const categoryExpenses = {};
+    transactions.forEach((transaction) => {
+      if (!categoryExpenses[transaction.category]) {
+        categoryExpenses[transaction.category] = 0;
+      }
+      categoryExpenses[transaction.category] += transaction.amount;
+    });
+
+    // 지출 총액 기준으로 내림차순 정렬
+    const sortedCategories = Object.keys(categoryExpenses).sort(
+      (a, b) => categoryExpenses[b] - categoryExpenses[a]
+    );
+
+    // 상위 5개 카테고리와 기타 카테고리로 분류
+    const top5Categories = sortedCategories.slice(0, 5);
+    const otherCategories = sortedCategories.slice(5);
+
+    // 기타 카테고리의 지출 총액 계산
+    const otherExpenses = otherCategories.reduce(
+      (total, category) => total + categoryExpenses[category],
+      0
+    );
+
+    // 상위 5개 카테고리와 기타 카테고리의 비율 계산
+    const totalExpense = transactions.reduce(
+      (total, transaction) => total + transaction.amount,
+      0
+    );
+    categoryExpenseRatio = top5Categories.map((category) => ({
+      category,
+      ratio: (categoryExpenses[category] / totalExpense) * 100,
+    }));
+    if (otherExpenses > 0) {
+      categoryExpenseRatio.push({
+        category: "기타",
+        ratio: (otherExpenses / totalExpense) * 100,
+      });
+    }
+  } catch (err) {
+    const error = new HttpError(
+      "요청한 카테고리 결과를 불러오지 못했습니다:",
+      err
+    );
+    return next(error);
+  }
+
+  res.status(200).json(categoryExpenseRatio);
+};
+
 exports.getTransactionById = getTransactionById;
 exports.getTransactionsByUserId = getTransactionsByUserId;
 exports.createTransaction = createTransaction;
@@ -331,3 +407,4 @@ exports.updateTransaction = updateTransaction;
 exports.deleteTransaction = deleteTransaction;
 exports.getMonthlyTransactions = getMonthlyTransactions;
 exports.getLatestYearExpenses = getLatestYearExpenses;
+exports.getExpensesTop5Categories = getExpensesTop5Categories;
