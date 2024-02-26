@@ -11,6 +11,7 @@ router.get("/user/:uid", communityControllers.getPostByUid);
 
 router.use(checkAuth);
 
+router.post("/:cid/like", communityControllers.updateLike);
 router.post("/", communityControllers.createPost);
 router.patch("/:cid", communityControllers.updatePost);
 router.delete("/:cid", communityControllers.deletePost);

@@ -191,9 +191,66 @@ const deletePost = async (req, res, next) => {
   res.status(200).json({ message: "삭제 완료", postId });
 };
 
+const updateLike = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(HttpError(errors.array(), 422));
+  }
+
+  const postId = req.params.cid;
+  const userId = req.userData.userId;
+
+  let post;
+  try {
+    post = await Community.findById(postId);
+  } catch (e) {
+    const error = new HttpError("해당 ID의 게시글을 불러오지 못했습니다.", 500);
+    return next(error);
+  }
+
+  if (!post) {
+    const error = new HttpError("게시글을 찾을 수 없습니다.", 404);
+    return next(error);
+  }
+
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (e) {
+    const error = new HttpError("해당 ID의 사용자를 불러오지 못했습니다.", 500);
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new HttpError("사용자를 찾을 수 없습니다.", 404);
+    return next(error);
+  }
+
+  //현재 사용자가 이미 해당 게시물에 좋아요를 눌렀는지 확인
+  const userLiked = post.like.includes(userId);
+
+  try {
+    if (userLiked) {
+      post.like.pull(userId);
+      user.likedPosts.pull(postId);
+    } else {
+      post.like.push(userId);
+      user.likedPosts.push(postId);
+    }
+    await post.save();
+    await user.save();
+
+    res.status(200).json({ message: "좋아요가 업데이트되었습니다." });
+  } catch (e) {
+    const error = new HttpError("좋아요 업데이트에 실패했습니다.", 500);
+    return next(error);
+  }
+};
+
 exports.getPosts = getPosts;
 exports.getPostById = getPostById;
 exports.getPostByUid = getPostByUid;
 exports.createPost = createPost;
 exports.updatePost = updatePost;
 exports.deletePost = deletePost;
+exports.updateLike = updateLike;
