@@ -25,6 +25,10 @@ const getPostById = async (req, res, next) => {
   let post;
   try {
     post = await Community.findById(postId);
+
+    //조회수 증가
+    post.hit++;
+    await post.save();
   } catch (e) {
     const error = new HttpError("게시글을 불러오지 못했습니다.", 500);
     return next(error);
