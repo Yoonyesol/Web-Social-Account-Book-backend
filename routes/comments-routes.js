@@ -11,5 +11,6 @@ router.get("/user/:uid", commentControllers.getCommentsByUserId);
 router.use(checkAuth);
 
 router.post("/", commentControllers.createComment);
+router.patch("/:rid", commentControllers.updateComment);
 
 module.exports = router;

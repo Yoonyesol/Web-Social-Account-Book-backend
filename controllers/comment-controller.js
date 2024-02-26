@@ -118,6 +118,41 @@ const createComment = async (req, res, next) => {
   res.status(200).json({ comment: createdComment });
 };
 
+const updateComment = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return next(HttpError(errors.array(), 422));
+  }
+
+  const { content } = req.body;
+  const commentId = req.params.rid;
+
+  let comment;
+  try {
+    comment = await Comment.findById(commentId);
+  } catch (e) {
+    const error = new HttpError("해당 ID의 댓글을 불러오지 못했습니다.", 500);
+    return next(error);
+  }
+
+  if (comment.authorId.toString() !== req.userData.userId) {
+    const error = new HttpError("댓글을 수정할 수 있는 권한이 없습니다.", 401);
+    return next(error);
+  }
+
+  comment.content = content;
+
+  try {
+    await comment.save();
+  } catch (e) {
+    const error = new HttpError("댓글 수정에 실패했습니다.", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ comment: comment.toObject({ getters: true }) });
+};
+
 exports.getCommentsByPostId = getCommentsByPostId;
 exports.getCommentsByUserId = getCommentsByUserId;
 exports.createComment = createComment;
+exports.updateComment = updateComment;
