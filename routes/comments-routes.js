@@ -12,5 +12,6 @@ router.use(checkAuth);
 
 router.post("/", commentControllers.createComment);
 router.patch("/:rid", commentControllers.updateComment);
+router.delete("/:rid", commentControllers.deleteComment);
 
 module.exports = router;
