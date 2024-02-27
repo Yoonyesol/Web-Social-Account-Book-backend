@@ -180,6 +180,31 @@ const login = async (req, res, next) => {
   });
 };
 
+//유저가 좋아요를 누른 게시글 정보 가져오기
+const getLikedPost = async (req, res, next) => {
+  const userId = req.userData.userId;
+
+  let user;
+  let likedPosts;
+  try {
+    user = await User.findById(userId).populate("likedPosts");
+    if (!user) {
+      const error = new HttpError("유저를 찾을 수 없습니다.", 500);
+      return next(error);
+    }
+
+    //최신순으로 정렬 후 최신 5개만 추출
+    user.likedPosts.reverse();
+    likedPosts = user.likedPosts.slice(0, 5);
+  } catch (err) {
+    const error = new HttpError("로그인에 실패했습니다. 재시도 해주세요.", 500);
+    return next(error);
+  }
+
+  res.status(200).json({ likedPosts });
+};
+
 exports.getUsers = getUsers;
 exports.signUp = signUp;
 exports.login = login;
+exports.getLikedPost = getLikedPost;

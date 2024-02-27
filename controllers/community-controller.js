@@ -44,7 +44,7 @@ const getPostById = async (req, res, next) => {
 
 //유저 ID로 게시글 가져오기
 const getPostByUid = async (req, res, next) => {
-  const userId = req.params.uid;
+  const userId = req.userData.userId;
 
   let posts;
   try {
