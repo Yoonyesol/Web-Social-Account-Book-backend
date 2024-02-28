@@ -8,6 +8,7 @@ const transactionsRoutes = require("./routes/transactions-routes");
 const userRoutes = require("./routes/users-routes");
 const communityRoutes = require("./routes/community-routes");
 const commentRoutes = require("./routes/comments-routes");
+const challengeRoutes = require("./routes/challenge-routes");
 const HttpError = require("./models/http-error");
 
 const app = express();
@@ -29,6 +30,7 @@ app.use("/api/transactions", transactionsRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/comment", commentRoutes);
+app.use("/api/challenge", challengeRoutes);
 
 // 앞선 라우트에게서 응답을 받지 못했을 경우에만 실행
 app.use((req, res, next) => {
