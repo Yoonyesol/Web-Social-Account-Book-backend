@@ -6,7 +6,7 @@ const challengeController = require("../controllers/challenge-controller");
 
 router.get("/:date", challengeController.getBudgetExpenseRatio);
 router.get(
-  "/similar/:uid/:date",
+  "/similar/:date/:budget",
   challengeController.getSimilarBudgetExpenseRatio
 );
 
