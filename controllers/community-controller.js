@@ -4,12 +4,13 @@ const Community = require("../models/community");
 const User = require("../models/user");
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
+const Counter = require("../models/counter");
 
 //전체 게시글 불러오기
 const getPosts = async (req, res, next) => {
   let posts;
   try {
-    posts = await Community.find({});
+    posts = await Community.find({}).sort({ date: -1 });
   } catch (err) {
     const error = new HttpError("게시글 정보를 가져오는 데 실패했습니다.", 500);
     return next(error);
@@ -86,7 +87,27 @@ const createPost = async (req, res, next) => {
     return next(error);
   }
 
+  let postIndex;
+  let counter;
+  try {
+    counter = await Counter.findOne({});
+    if (!counter) {
+      const newCounter = new Counter({ totalPosts: 1 });
+      await newCounter.save();
+      postIndex = 1;
+    } else {
+      postIndex = counter.totalPosts + 1;
+    }
+  } catch (err) {
+    const error = new HttpError(
+      "totalPosts 값을 업데이트하지 못했습니다.",
+      500
+    );
+    return next(error);
+  }
+
   const createdPost = new Community({
+    index: postIndex,
     writer: {
       uid: user.id,
       name: user.name,
@@ -106,7 +127,21 @@ const createPost = async (req, res, next) => {
     await user.save({ session: sess });
     await sess.commitTransaction();
   } catch (e) {
-    const error = new HttpError("해당 ID의 게시글을 불러오지 못했습니다.", 500);
+    const error = new HttpError("해당 ID의 게시글을 저장하지 못했습니다.", 500);
+    return next(error);
+  }
+
+  //게시글 생성에 성공했을 때만 totalPosts를 증가시킨다
+  try {
+    if (counter) {
+      counter.totalPosts += 1;
+      await counter.save();
+    }
+  } catch (err) {
+    const error = new HttpError(
+      "totalPosts 값을 업데이트하지 못했습니다.",
+      500
+    );
     return next(error);
   }
 
