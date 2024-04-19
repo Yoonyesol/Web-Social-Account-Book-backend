@@ -8,6 +8,7 @@ const checkAuth = require("../middleware/check-auth");
 router.get("/", communityControllers.getPosts);
 router.get("/:cid", communityControllers.getPostById);
 router.get("/user/:uid", communityControllers.getPostByUid);
+router.get("/search/:option/:keyword", communityControllers.getSearchedPosts);
 
 router.use(checkAuth);
 

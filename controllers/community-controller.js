@@ -63,6 +63,43 @@ const getPostByUid = async (req, res, next) => {
   res.json({ posts: posts.map((p) => p.toObject({ getters: true })) });
 };
 
+//검색어로 게시글 가져오기
+const getSearchedPosts = async (req, res, next) => {
+  const { option, keyword } = req.params;
+
+  let posts;
+  try {
+    let query = {};
+
+    if (option === "title") {
+      query["title"] = { $regex: keyword, $options: "i" };
+    } else if (option === "content") {
+      query["content"] = { $regex: keyword, $options: "i" };
+    } else if (option === "title+content") {
+      query["$or"] = [
+        { title: { $regex: keyword, $options: "i" } },
+        { content: { $regex: keyword, $options: "i" } },
+      ];
+    } else if (option === "writer") {
+      query["writer"] = { $regex: keyword, $options: "i" };
+    } else if (option === "comment") {
+      query["comment"] = { $regex: keyword, $options: "i" };
+    }
+
+    posts = await Community.find(query);
+  } catch (e) {
+    const error = new HttpError("게시글을 불러오지 못했습니다.", 500);
+    return next(error);
+  }
+
+  if (!posts || posts.length === 0) {
+    const error = new HttpError("해당 검색어의 게시글을 찾지 못했습니다.", 404);
+    return next(error);
+  }
+
+  res.json({ searchedData: posts.map((p) => p.toObject({ getters: true })) });
+};
+
 const createPost = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -285,6 +322,7 @@ const updateLike = async (req, res, next) => {
 exports.getPosts = getPosts;
 exports.getPostById = getPostById;
 exports.getPostByUid = getPostByUid;
+exports.getSearchedPosts = getSearchedPosts;
 exports.createPost = createPost;
 exports.updatePost = updatePost;
 exports.deletePost = deletePost;
