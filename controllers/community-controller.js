@@ -81,12 +81,14 @@ const getSearchedPosts = async (req, res, next) => {
         { content: { $regex: keyword, $options: "i" } },
       ];
     } else if (option === "writer") {
-      query["writer"] = { $regex: keyword, $options: "i" };
-    } else if (option === "comment") {
-      query["comment"] = { $regex: keyword, $options: "i" };
+      const users = await User.find({
+        name: { $regex: keyword, $options: "i" },
+      }).select("name");
+      const userNames = users.map((user) => user.name);
+      query["writer.name"] = { $in: userNames };
     }
 
-    posts = await Community.find(query);
+    posts = await Community.find(query).populate("writer");
   } catch (e) {
     const error = new HttpError("게시글을 불러오지 못했습니다.", 500);
     return next(error);
