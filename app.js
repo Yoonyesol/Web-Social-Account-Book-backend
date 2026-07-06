@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 const mongoose = require("mongoose");
 
 const transactionsRoutes = require("./routes/transactions-routes");
@@ -16,15 +17,13 @@ const app = express();
 app.use(bodyParser.json());
 
 //cors 에러 해결
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", process.env.FRONT_END_URL);
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
-  next();
-});
+app.use(
+  cors({
+    origin: process.env.FRONT_END_URL,
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+  })
+);
 
 app.use("/api/transactions", transactionsRoutes);
 app.use("/api/users", userRoutes);
@@ -46,12 +45,18 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "정의되지 않은 에러 발생" });
 });
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    //db 연결이 성공할 경우 서버 연결
-    app.listen(5000);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+module.exports = app;
+
+// 테스트에서는 이 파일을 require만 하고 직접 실행하지 않으므로,
+// node app.js로 직접 실행했을 때만 실제 DB 연결 및 서버 기동을 수행한다.
+if (require.main === module) {
+  mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => {
+      //db 연결이 성공할 경우 서버 연결
+      app.listen(5000);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
