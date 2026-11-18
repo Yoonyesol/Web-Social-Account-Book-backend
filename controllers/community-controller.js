@@ -7,29 +7,42 @@ const { validationResult } = require("express-validator");
 const Counter = require("../models/counter");
 
 //전체 게시글 불러오기
+const serializePost = (post, userData) => {
+  const data = post.toObject({ getters: true });
+  if (userData) return data;
+  const { id, _id, index, category, title, content, date, hit, writer, like, comments } = data;
+  return {
+    id, _id, index, category, title, content, date, hit,
+    writer: { name: writer.name },
+    likeCount: like.length,
+    commentCount: comments.length,
+  };
+};
+
 const getPosts = async (req, res, next) => {
   let posts;
   try {
-    posts = await Community.find({}).sort({ date: -1 });
+    posts = await Community.find(req.userData ? {} : { isPublic: true }).sort({ date: -1 });
   } catch (err) {
     const error = new HttpError("게시글 정보를 가져오는 데 실패했습니다.", 500);
     return next(error);
   }
 
-  res.json({ posts: posts.map((post) => post.toObject({ getters: true })) });
+  res.json({ posts: posts.map((post) => serializePost(post, req.userData)) });
 };
 
 //게시글 ID로 특정 게시글 불러오기
 const getPostById = async (req, res, next) => {
   const postId = req.params.cid;
 
+  if (!mongoose.isValidObjectId(postId)) {
+    return next(new HttpError("게시글을 찾을 수 없습니다.", 404));
+  }
+
+  const query = req.userData ? { _id: postId } : { _id: postId, isPublic: true };
   let post;
   try {
-    post = await Community.findById(postId);
-
-    //조회수 증가
-    post.hit++;
-    await post.save();
+    post = await Community.findOneAndUpdate(query, { $inc: { hit: 1 } }, { new: true });
   } catch (e) {
     const error = new HttpError("게시글을 불러오지 못했습니다.", 500);
     return next(error);
@@ -40,7 +53,7 @@ const getPostById = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ post: post.toObject({ getters: true }) });
+  res.json({ post: serializePost(post, req.userData) });
 };
 
 //유저 ID로 게시글 가져오기
@@ -69,37 +82,32 @@ const getSearchedPosts = async (req, res, next) => {
 
   let posts;
   try {
-    let query = {};
+    const query = req.userData ? {} : { isPublic: true };
+    const literalKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const match = { $regex: literalKeyword, $options: "i" };
 
     if (option === "title") {
-      query["title"] = { $regex: keyword, $options: "i" };
+      query.title = match;
     } else if (option === "content") {
-      query["content"] = { $regex: keyword, $options: "i" };
+      query.content = match;
     } else if (option === "title+content") {
       query["$or"] = [
-        { title: { $regex: keyword, $options: "i" } },
-        { content: { $regex: keyword, $options: "i" } },
+        { title: match },
+        { content: match },
       ];
     } else if (option === "writer") {
-      const users = await User.find({
-        name: { $regex: keyword, $options: "i" },
-      }).select("name");
-      const userNames = users.map((user) => user.name);
-      query["writer.name"] = { $in: userNames };
+      query["writer.name"] = match;
+    } else {
+      return next(new HttpError("지원하지 않는 검색 조건입니다.", 400));
     }
 
-    posts = await Community.find(query).populate("writer");
+    posts = await Community.find(query);
   } catch (e) {
     const error = new HttpError("게시글을 불러오지 못했습니다.", 500);
     return next(error);
   }
 
-  if (!posts || posts.length === 0) {
-    const error = new HttpError("해당 검색어의 게시글을 찾지 못했습니다.", 404);
-    return next(error);
-  }
-
-  res.json({ searchedData: posts.map((p) => p.toObject({ getters: true })) });
+  res.json({ searchedData: posts.map((post) => serializePost(post, req.userData)) });
 };
 
 const createPost = async (req, res, next) => {
@@ -108,7 +116,7 @@ const createPost = async (req, res, next) => {
     return next(HttpError(errors.array(), 422));
   }
 
-  const { date, category, title, content } = req.body;
+  const { date, category, title, content, isPublic } = req.body;
 
   let user;
   try {
@@ -147,6 +155,7 @@ const createPost = async (req, res, next) => {
 
   const createdPost = new Community({
     index: postIndex,
+    isPublic: isPublic === true,
     writer: {
       uid: user.id,
       name: user.name,

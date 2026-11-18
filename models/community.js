@@ -11,6 +11,7 @@ const communitySchema = new Schema({
   },
   date: { type: Date, default: Date.now, required: true },
   category: { type: String, required: true },
+  isPublic: { type: Boolean, default: false },
   title: { type: String, required: true },
   content: { type: String, required: true },
   hit: { type: Number, default: 0, required: true },

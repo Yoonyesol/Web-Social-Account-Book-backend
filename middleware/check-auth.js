@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const HttpError = require("../models/http-error");
 
-module.exports = (req, res, next) => {
+const checkAuth = (req, res, next) => {
   // 서버에게 확인을 위해 보내는 OPTIONS 요청을 차단하지 않도록 처리
   if (req.method === "OPTIONS") {
     return next(); // 다음 요청 처리
@@ -32,4 +32,13 @@ module.exports = (req, res, next) => {
     const error = new HttpError("인증에 실패했습니다!", 401);
     return next(error);
   }
+};
+
+module.exports = checkAuth;
+module.exports.optional = (req, res, next) => {
+  res.set("Cache-Control", "private, no-store");
+  if (req.headers.authorization === undefined) {
+    return next();
+  }
+  return checkAuth(req, res, next);
 };

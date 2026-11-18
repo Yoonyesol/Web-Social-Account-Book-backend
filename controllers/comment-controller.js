@@ -9,9 +9,18 @@ const mongoose = require("mongoose");
 const getCommentsByPostId = async (req, res, next) => {
   const postId = req.params.cid;
 
+  if (!mongoose.isValidObjectId(postId)) {
+    return next(new HttpError("게시글을 찾을 수 없습니다.", 404));
+  }
+
   let comments;
   try {
-    comments = await Comment.find({ postId });
+    const query = req.userData ? { _id: postId } : { _id: postId, isPublic: true };
+    if (!(await Community.exists(query))) {
+      return next(new HttpError("게시글을 찾을 수 없습니다.", 404));
+    }
+    const fields = req.userData ? undefined : "_id authorName content createdAt";
+    comments = await Comment.find({ postId }, fields);
   } catch (e) {
     const error = new HttpError("댓글 내역을 불러오지 못했습니다.", 500);
     return next(error);
