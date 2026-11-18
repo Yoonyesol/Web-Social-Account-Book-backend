@@ -20,10 +20,7 @@ const getTransactionById = async (req, res, next) => {
 
   // GET 요청에 문제가 없지만 입출금내역을 찾을 수 없는 경우 에러 핸들링
   if (!transaction) {
-    const error = new HttpError(
-      "해당 ID에 대한 입출금내역을 찾지 못했습니다.",
-      404
-    );
+    const error = new HttpError("해당 ID에 대한 입출금내역을 찾지 못했습니다.", 404);
     return next(error);
   }
 
@@ -42,9 +39,7 @@ const getTransactionsByUserId = async (req, res, next) => {
   }
 
   if (!transactions || transactions.length === 0) {
-    return next(
-      new HttpError("해당 유저의 입출금내역을 찾지 못했습니다.", 404)
-    );
+    return next(new HttpError("해당 유저의 입출금내역을 찾지 못했습니다.", 404));
   }
 
   res.json({
@@ -57,8 +52,7 @@ const createTransaction = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return next(HttpError(errors.array(), 422));
   }
-  const { uid, transaction_type, date, category, title, amount, memo } =
-    req.body;
+  const { uid, transaction_type, date, category, title, amount, memo } = req.body;
 
   //모델 생성 완료
   const createdTransaction = new Transaction({
@@ -81,10 +75,7 @@ const createTransaction = async (req, res, next) => {
   }
 
   if (!user) {
-    const error = new HttpError(
-      "주어진 id에 해당하는 사용자가 존재하지 않습니다.",
-      500
-    );
+    const error = new HttpError("주어진 id에 해당하는 사용자가 존재하지 않습니다.", 500);
     return next(error);
   }
 
@@ -97,10 +88,7 @@ const createTransaction = async (req, res, next) => {
     await user.save({ session: sess }); //업데이트한 문서 저장
     await sess.commitTransaction(); //세션이 트랜잭션 커밋
   } catch (e) {
-    const error = new HttpError(
-      "해당 ID의 입출금내역을 불러오지 못했습니다.",
-      500
-    );
+    const error = new HttpError("해당 ID의 입출금내역을 불러오지 못했습니다.", 500);
     return next(error);
   }
 
@@ -127,10 +115,7 @@ const updateTransaction = async (req, res, next) => {
 
   //생성자가 아니면 내용 수정 불가
   if (transaction.uid.toString() !== req.userData.userId) {
-    const error = new HttpError(
-      "입출금내역을 업데이트할 수 있는 권한이 없습니다.",
-      401
-    );
+    const error = new HttpError("입출금내역을 업데이트할 수 있는 권한이 없습니다.", 401);
     return next(error);
   }
 
@@ -149,9 +134,7 @@ const updateTransaction = async (req, res, next) => {
     return next(error);
   }
 
-  res
-    .status(200)
-    .json({ transaction: transaction.toObject({ getters: true }) });
+  res.status(200).json({ transaction: transaction.toObject({ getters: true }) });
 };
 
 const deleteTransaction = async (req, res, next) => {
@@ -174,10 +157,7 @@ const deleteTransaction = async (req, res, next) => {
 
   //생성자가 아니면 내용 수정 불가
   if (transaction.uid._id.toString() !== req.userData.userId) {
-    const error = new HttpError(
-      "입출금내역을 삭제할 수 있는 권한이 없습니다.",
-      401
-    );
+    const error = new HttpError("입출금내역을 삭제할 수 있는 권한이 없습니다.", 401);
     return next(error);
   }
 
@@ -203,14 +183,7 @@ const getMonthlyTransactions = async (req, res, next) => {
   const { uid, date } = req.params;
   const [year, month] = date.split("-");
   const firstDay = new Date(parseInt(year), parseInt(month) - 1, 1).getTime();
-  const lastDay = new Date(
-    parseInt(year),
-    parseInt(month),
-    0,
-    23,
-    59,
-    59
-  ).getTime();
+  const lastDay = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59).getTime();
 
   let income, expense;
   try {
@@ -248,10 +221,7 @@ const getMonthlyTransactions = async (req, res, next) => {
       },
     ]);
   } catch (err) {
-    const error = new HttpError(
-      "요청한 월별 입출금 합계를 불러오지 못했습니다:",
-      err
-    );
+    const error = new HttpError("요청한 월별 입출금 합계를 불러오지 못했습니다:", err);
     return next(error);
   }
 
@@ -271,11 +241,7 @@ const getLatestYearExpenses = async (req, res, next) => {
     const currentDate = new Date();
 
     for (let i = 11; i >= 0; i--) {
-      const firstDayOfMonth = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() - i,
-        1
-      ).getTime();
+      const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1).getTime();
       const lastDayOfMonth = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth() - i + 1,
@@ -311,10 +277,7 @@ const getLatestYearExpenses = async (req, res, next) => {
       });
     }
   } catch (err) {
-    const error = new HttpError(
-      "요청한 최근 1년 지출을 불러오지 못했습니다:",
-      err
-    );
+    const error = new HttpError("요청한 최근 1년 지출을 불러오지 못했습니다:", err);
     return next(error);
   }
 
@@ -330,19 +293,8 @@ const getExpensesTop5Categories = async (req, res, next) => {
 
   try {
     const currentDate = new Date();
-    const firstDayOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    ).getTime();
-    const lastDayOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() + 1,
-      0,
-      23,
-      59,
-      59
-    ).getTime();
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getTime();
+    const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59).getTime();
 
     const transactions = await Transaction.find({
       uid: new ObjectId(userId),
@@ -360,25 +312,17 @@ const getExpensesTop5Categories = async (req, res, next) => {
     });
 
     // 지출 총액 기준으로 내림차순 정렬
-    const sortedCategories = Object.keys(categoryExpenses).sort(
-      (a, b) => categoryExpenses[b] - categoryExpenses[a]
-    );
+    const sortedCategories = Object.keys(categoryExpenses).sort((a, b) => categoryExpenses[b] - categoryExpenses[a]);
 
     // 상위 5개 카테고리와 기타 카테고리로 분류
     const top5Categories = sortedCategories.slice(0, 5);
     const otherCategories = sortedCategories.slice(5);
 
     // 기타 카테고리의 지출 총액 계산
-    const otherExpenses = otherCategories.reduce(
-      (total, category) => total + categoryExpenses[category],
-      0
-    );
+    const otherExpenses = otherCategories.reduce((total, category) => total + categoryExpenses[category], 0);
 
     // 상위 5개 카테고리와 기타 카테고리의 비율 계산
-    const totalExpense = transactions.reduce(
-      (total, transaction) => total + transaction.amount,
-      0
-    );
+    const totalExpense = transactions.reduce((total, transaction) => total + transaction.amount, 0);
     categoryExpenseRatio = top5Categories.map((category) => ({
       category,
       ratio: (categoryExpenses[category] / totalExpense) * 100,
@@ -390,10 +334,7 @@ const getExpensesTop5Categories = async (req, res, next) => {
       });
     }
   } catch (err) {
-    const error = new HttpError(
-      "요청한 카테고리 결과를 불러오지 못했습니다:",
-      err
-    );
+    const error = new HttpError("요청한 카테고리 결과를 불러오지 못했습니다:", err);
     return next(error);
   }
 

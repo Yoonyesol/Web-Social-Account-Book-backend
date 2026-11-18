@@ -6,23 +6,32 @@ const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
 const Counter = require("../models/counter");
 
-//전체 게시글 불러오기
 const serializePost = (post, userData) => {
   const data = post.toObject({ getters: true });
   if (userData) return data;
   const { id, _id, index, category, title, content, date, hit, writer, like, comments } = data;
   return {
-    id, _id, index, category, title, content, date, hit,
+    id,
+    _id,
+    index,
+    category,
+    title,
+    content,
+    date,
+    hit,
     writer: { name: writer.name },
     likeCount: like.length,
     commentCount: comments.length,
   };
 };
 
+//전체 게시글 불러오기
 const getPosts = async (req, res, next) => {
   let posts;
   try {
-    posts = await Community.find(req.userData ? {} : { isPublic: true }).sort({ date: -1 });
+    posts = await Community.find(req.userData ? {} : { isPublic: true }).sort({
+      date: -1,
+    });
   } catch (err) {
     const error = new HttpError("게시글 정보를 가져오는 데 실패했습니다.", 500);
     return next(error);
@@ -91,10 +100,7 @@ const getSearchedPosts = async (req, res, next) => {
     } else if (option === "content") {
       query.content = match;
     } else if (option === "title+content") {
-      query["$or"] = [
-        { title: match },
-        { content: match },
-      ];
+      query["$or"] = [{ title: match }, { content: match }];
     } else if (option === "writer") {
       query["writer.name"] = match;
     } else {
@@ -107,7 +113,9 @@ const getSearchedPosts = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ searchedData: posts.map((post) => serializePost(post, req.userData)) });
+  res.json({
+    searchedData: posts.map((post) => serializePost(post, req.userData)),
+  });
 };
 
 const createPost = async (req, res, next) => {
@@ -127,10 +135,7 @@ const createPost = async (req, res, next) => {
   }
 
   if (!user) {
-    const error = new HttpError(
-      "주어진 id에 해당하는 사용자가 존재하지 않습니다.",
-      500
-    );
+    const error = new HttpError("주어진 id에 해당하는 사용자가 존재하지 않습니다.", 500);
     return next(error);
   }
 
@@ -146,10 +151,7 @@ const createPost = async (req, res, next) => {
       postIndex = counter.totalPosts + 1;
     }
   } catch (err) {
-    const error = new HttpError(
-      "totalPosts 값을 업데이트하지 못했습니다.",
-      500
-    );
+    const error = new HttpError("totalPosts 값을 업데이트하지 못했습니다.", 500);
     return next(error);
   }
 
@@ -186,10 +188,7 @@ const createPost = async (req, res, next) => {
       await counter.save();
     }
   } catch (err) {
-    const error = new HttpError(
-      "totalPosts 값을 업데이트하지 못했습니다.",
-      500
-    );
+    const error = new HttpError("totalPosts 값을 업데이트하지 못했습니다.", 500);
     return next(error);
   }
 
@@ -218,10 +217,7 @@ const updatePost = async (req, res, next) => {
   }
 
   if (post.writer.uid.toString() !== req.userData.userId) {
-    const error = new HttpError(
-      "게시글을 수정할 수 있는 권한이 없습니다.",
-      401
-    );
+    const error = new HttpError("게시글을 수정할 수 있는 권한이 없습니다.", 401);
     return next(error);
   }
 
@@ -256,10 +252,7 @@ const deletePost = async (req, res, next) => {
   }
 
   if (post.writer.uid._id.toString() !== req.userData.userId) {
-    const error = new HttpError(
-      "게시글을 삭제할 수 있는 권한이 없습니다.",
-      401
-    );
+    const error = new HttpError("게시글을 삭제할 수 있는 권한이 없습니다.", 401);
     return next(error);
   }
 

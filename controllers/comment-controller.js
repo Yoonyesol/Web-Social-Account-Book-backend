@@ -27,10 +27,7 @@ const getCommentsByPostId = async (req, res, next) => {
   }
 
   if (!comments) {
-    const error = new HttpError(
-      "해당 포스트에 대한 댓글 내역을 찾지 못했습니다.",
-      404
-    );
+    const error = new HttpError("해당 포스트에 대한 댓글 내역을 찾지 못했습니다.", 404);
     return next(error);
   }
 
@@ -73,10 +70,7 @@ const createComment = async (req, res, next) => {
   }
 
   if (!user) {
-    const error = new HttpError(
-      "주어진 id에 해당하는 사용자가 존재하지 않습니다.",
-      500
-    );
+    const error = new HttpError("주어진 id에 해당하는 사용자가 존재하지 않습니다.", 500);
     return next(error);
   }
 
@@ -96,10 +90,7 @@ const createComment = async (req, res, next) => {
   }
 
   if (!post) {
-    const error = new HttpError(
-      "주어진 id에 해당하는 게시물을 찾을 수 없습니다.",
-      404
-    );
+    const error = new HttpError("주어진 id에 해당하는 게시물을 찾을 수 없습니다.", 404);
     return next(error);
   }
 
@@ -116,10 +107,7 @@ const createComment = async (req, res, next) => {
 
     await sess.commitTransaction();
   } catch (e) {
-    const error = new HttpError(
-      "해당 ID의 댓글 내역을 저장하지 못했습니다.",
-      500
-    );
+    const error = new HttpError("해당 ID의 댓글 내역을 저장하지 못했습니다.", 500);
     return next(error);
   }
 
@@ -164,9 +152,7 @@ const deleteComment = async (req, res, next) => {
 
   let comment;
   try {
-    comment = await Comment.findById(commentId)
-      .populate("authorId")
-      .populate("postId");
+    comment = await Comment.findById(commentId).populate("authorId").populate("postId");
   } catch (e) {
     const error = new HttpError("댓글을 불러올 수 없습니다.", 500);
     return next(error);

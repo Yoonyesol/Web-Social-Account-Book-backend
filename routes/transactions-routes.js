@@ -12,14 +12,8 @@ router.use(checkAuth);
 router.get("/:tid", transactionsControllers.getTransactionById);
 router.get("/user/:uid", transactionsControllers.getTransactionsByUserId);
 router.get("/:uid/:date", transactionsControllers.getMonthlyTransactions);
-router.get(
-  "/user/latestExpenses/:uid",
-  transactionsControllers.getLatestYearExpenses
-);
-router.get(
-  "/user/:uid/expense/category/top5",
-  transactionsControllers.getExpensesTop5Categories
-);
+router.get("/user/latestExpenses/:uid", transactionsControllers.getLatestYearExpenses);
+router.get("/user/:uid/expense/category/top5", transactionsControllers.getExpensesTop5Categories);
 
 router.post("/", transactionsControllers.createTransaction);
 router.patch("/:tid", transactionsControllers.updateTransaction);

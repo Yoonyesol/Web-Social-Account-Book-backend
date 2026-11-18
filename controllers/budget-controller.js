@@ -15,10 +15,7 @@ const getBudgetByMonthYear = async (req, res, next) => {
 
     let budget = user.budgets.find((budget) => {
       const [bYear, bMonth] = budget.monthYear.split("-");
-      return (
-        parseInt(bYear) === parseInt(year) &&
-        parseInt(bMonth) === parseInt(month)
-      );
+      return parseInt(bYear) === parseInt(year) && parseInt(bMonth) === parseInt(month);
     });
 
     // 데이터가 없는 경우 새로운 예산 생성
@@ -51,9 +48,7 @@ const updateBudget = async (req, res, next) => {
       throw new HttpError("해당 ID의 사용자를 찾을 수 없습니다.", 404);
     }
 
-    const budgetIndex = user.budgets.findIndex(
-      (budget) => budget._id.toString() === budgetId
-    );
+    const budgetIndex = user.budgets.findIndex((budget) => budget._id.toString() === budgetId);
     if (budgetIndex === -1) {
       throw new HttpError("해당 ID의 예산을 찾을 수 없습니다.", 404);
     }
@@ -62,14 +57,9 @@ const updateBudget = async (req, res, next) => {
     user.budgets[budgetIndex].amount = amount;
     await user.save();
 
-    res
-      .status(200)
-      .json({ budget: user.budgets[budgetIndex].toObject({ getters: true }) });
+    res.status(200).json({ budget: user.budgets[budgetIndex].toObject({ getters: true }) });
   } catch (err) {
-    const error = new HttpError(
-      "예산 정보를 업데이트하는 데 실패했습니다.",
-      500
-    );
+    const error = new HttpError("예산 정보를 업데이트하는 데 실패했습니다.", 500);
     return next(error);
   }
 };

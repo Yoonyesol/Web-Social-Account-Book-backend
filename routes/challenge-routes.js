@@ -8,9 +8,6 @@ const challengeController = require("../controllers/challenge-controller");
 router.use(checkAuth);
 
 router.get("/:date", challengeController.getBudgetExpenseRatio);
-router.get(
-  "/similar/:date/:budget",
-  challengeController.getSimilarBudgetExpenseRatio
-);
+router.get("/similar/:date/:budget", challengeController.getSimilarBudgetExpenseRatio);
 
 module.exports = router;

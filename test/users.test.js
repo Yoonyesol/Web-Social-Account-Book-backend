@@ -84,9 +84,7 @@ describe("로그인 (POST /api/users/login)", () => {
   });
 
   test("비밀번호가 틀리면 401을 반환한다", async () => {
-    const res = await request(app)
-      .post("/api/users/login")
-      .send({ email: testUser.email, password: "wrong-password" });
+    const res = await request(app).post("/api/users/login").send({ email: testUser.email, password: "wrong-password" });
 
     expect(res.status).toBe(401);
   });

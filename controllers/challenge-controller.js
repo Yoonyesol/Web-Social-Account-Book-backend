@@ -8,10 +8,9 @@ const getBudgetExpenseRatio = async (req, res, next) => {
   let challenge;
 
   try {
-    const users = await User.find(
-      {},
-      { _id: 1, name: 1, email: 1, budgets: 1, transactions: 1 }
-    ).populate("transactions");
+    const users = await User.find({}, { _id: 1, name: 1, email: 1, budgets: 1, transactions: 1 }).populate(
+      "transactions"
+    );
 
     if (!users || users.length === 0) {
       throw new HttpError("사용자 정보를 불러올 수 없습니다.", 404);
@@ -68,10 +67,7 @@ const getBudgetExpenseRatio = async (req, res, next) => {
 
     challenge = ranking;
   } catch (error) {
-    const err = new HttpError(
-      "예산 대비 지출 정보를 가져오는 데 실패했습니다.",
-      500
-    );
+    const err = new HttpError("예산 대비 지출 정보를 가져오는 데 실패했습니다.", 500);
     return next(err);
   }
 
@@ -85,10 +81,9 @@ const getSimilarBudgetExpenseRatio = async (req, res, next) => {
   let similarBudgetUsers;
 
   try {
-    const users = await User.find(
-      {},
-      { _id: 1, name: 1, email: 1, budgets: 1, transactions: 1 }
-    ).populate("transactions");
+    const users = await User.find({}, { _id: 1, name: 1, email: 1, budgets: 1, transactions: 1 }).populate(
+      "transactions"
+    );
 
     if (!users || users.length === 0) {
       throw new HttpError("사용자 정보를 불러올 수 없습니다.", 404);
@@ -151,8 +146,7 @@ const getSimilarBudgetExpenseRatio = async (req, res, next) => {
           ) {
             const totalExpense = transactions.reduce((total, transaction) => {
               const transactionYear = new Date(transaction.date).getFullYear();
-              const transactionMonth =
-                new Date(transaction.date).getMonth() + 1;
+              const transactionMonth = new Date(transaction.date).getMonth() + 1;
               if (
                 transactionYear === parseInt(year) &&
                 transactionMonth === parseInt(month) &&
@@ -180,10 +174,7 @@ const getSimilarBudgetExpenseRatio = async (req, res, next) => {
         .sort((a, b) => a.expenseRatio - b.expenseRatio);
     }
   } catch (error) {
-    const err = new HttpError(
-      "예산 대비 지출 정보를 가져오는 데 실패했습니다.",
-      500
-    );
+    const err = new HttpError("예산 대비 지출 정보를 가져오는 데 실패했습니다.", 500);
     return next(err);
   }
 

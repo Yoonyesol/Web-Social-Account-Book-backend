@@ -12,10 +12,7 @@ const getUsers = async (req, res, next) => {
   try {
     users = await User.find({}, "-password"); //비밀번호 제외한 모든 정보 가져오기
   } catch (err) {
-    const error = new HttpError(
-      "유저 정보를 가져오는 데 실패했습니다. 잠시 후 다시 시도 해주세요.",
-      500
-    );
+    const error = new HttpError("유저 정보를 가져오는 데 실패했습니다. 잠시 후 다시 시도 해주세요.", 500);
     return next(error);
   }
 
@@ -43,10 +40,7 @@ const signUp = async (req, res, next) => {
   }
 
   if (existingUser) {
-    const error = new HttpError(
-      "이미 등록된 이메일이 존재합니다. 다른 이메일로 회원가입 해주세요.",
-      422
-    );
+    const error = new HttpError("이미 등록된 이메일이 존재합니다. 다른 이메일로 회원가입 해주세요.", 422);
     return next(error);
   }
 
@@ -93,10 +87,7 @@ const signUp = async (req, res, next) => {
       { expiresIn: "3h" } //만료기간
     );
   } catch (err) {
-    const error = new HttpError(
-      "회원가입에 실패했습니다. 잠시 후 다시 시도 해주세요.",
-      500
-    );
+    const error = new HttpError("회원가입에 실패했습니다. 잠시 후 다시 시도 해주세요.", 500);
     return next(error);
   }
 
@@ -127,10 +118,7 @@ const login = async (req, res, next) => {
 
   //이메일 존재 여부, 비밀번호 일치하는지 검사
   if (!existingUser) {
-    const error = new HttpError(
-      "이메일 혹은 비밀번호가 일치하지 않습니다.",
-      401
-    );
+    const error = new HttpError("이메일 혹은 비밀번호가 일치하지 않습니다.", 401);
     return next(error);
   }
 
@@ -139,18 +127,12 @@ const login = async (req, res, next) => {
   try {
     isValidPassword = await bcrypt.compare(password, existingUser.password);
   } catch (err) {
-    const error = new HttpError(
-      "비밀번호가 일치하지 않습니다. 비밀번호를 확인 후 다시 시도해주세요.",
-      500
-    );
+    const error = new HttpError("비밀번호가 일치하지 않습니다. 비밀번호를 확인 후 다시 시도해주세요.", 500);
     return next(error);
   }
 
   if (!isValidPassword) {
-    const error = new HttpError(
-      "이메일 혹은 비밀번호가 일치하지 않습니다.",
-      401
-    );
+    const error = new HttpError("이메일 혹은 비밀번호가 일치하지 않습니다.", 401);
     return next(error);
   }
 
