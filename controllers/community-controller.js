@@ -108,11 +108,11 @@ const createPost = async (req, res, next) => {
     return next(HttpError(errors.array(), 422));
   }
 
-  const { writer, date, category, title, content } = req.body;
+  const { date, category, title, content } = req.body;
 
   let user;
   try {
-    user = await User.findById(writer);
+    user = await User.findById(req.userData.userId);
   } catch {
     const error = new HttpError("유저id가 존재하지 않습니다.", 500);
     return next(error);
@@ -202,6 +202,10 @@ const updatePost = async (req, res, next) => {
   } catch (e) {
     const error = new HttpError("해당 ID의 게시글을 불러오지 못했습니다.", 500);
     return next(error);
+  }
+
+  if (!post) {
+    return next(new HttpError("게시글을 찾을 수 없습니다.", 404));
   }
 
   if (post.writer.uid.toString() !== req.userData.userId) {

@@ -53,19 +53,11 @@ const createComment = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return next(HttpError(errors.array(), 422));
   }
-  const { postId, authorId, authorName, content } = req.body;
-
-  const createdComment = new Comment({
-    postId,
-    authorId,
-    authorName,
-    content,
-    createdAt: new Date().getTime(),
-  });
+  const { postId, content } = req.body;
 
   let user;
   try {
-    user = await User.findById(authorId);
+    user = await User.findById(req.userData.userId);
   } catch (err) {
     const error = new HttpError("유저id가 존재하지 않습니다.", 500);
     return next(error);
@@ -78,6 +70,13 @@ const createComment = async (req, res, next) => {
     );
     return next(error);
   }
+
+  const createdComment = new Comment({
+    postId,
+    authorId: user.id,
+    authorName: user.name,
+    content,
+  });
 
   let post;
   try {
@@ -128,6 +127,10 @@ const updateComment = async (req, res, next) => {
   } catch (e) {
     const error = new HttpError("해당 ID의 댓글을 불러오지 못했습니다.", 500);
     return next(error);
+  }
+
+  if (!comment) {
+    return next(new HttpError("댓글을 찾을 수 없습니다.", 404));
   }
 
   if (comment.authorId.toString() !== req.userData.userId) {
